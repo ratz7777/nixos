@@ -104,6 +104,7 @@
 
     #edu
     (python3.withPackages (ps: [ ps.tkinter ]))
+    libreoffice
 
     # Editors and development
     neovim
@@ -111,6 +112,7 @@
 
     # Web browser
     firefox
+    librewolf
 
     # System utilities
     wget
