@@ -2,14 +2,16 @@
 { config, lib, pkgs, inputs, pkgs-stable, ... }:
 
 {
-  imports = [
-    ./hardware-configuration.nix
-  ];
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
+
+  services.printing = {
+  enable = true;
+  drivers = [pkgs.hplipWithPlugin];
+  };
 
   # Boot configuration
   boot.loader = {
@@ -27,7 +29,7 @@
   time.timeZone = "Europe/Moscow";
 
   i18n = {
-    defaultLocale = "ru_RU.UTF-8";
+    defaultLocale = "en_US.UTF-8";
     supportedLocales = [
       "ru_RU.UTF-8/UTF-8"
       "en_US.UTF-8/UTF-8"
@@ -62,6 +64,11 @@
     };
     desktopManager.plasma6.enable = true;
     displayManager.ly.enable = true;
+    displayManager.ly.settings = {
+        xsessions = "";
+        default_input = "password";
+    };
+
 
     # Enable Flatpak
     flatpak.enable = true;
@@ -75,7 +82,7 @@
       extraPkgs = pkgs: with pkgs; [
         libepoxy
         zstd
-        # Add more libraries here as needed
+
       ];
     };
   };
@@ -91,13 +98,6 @@
       # User-specific packages go here
     ];
   };
-
-  #build in ram
-  fileSystems."/nix/var/nix/builds" = {
-  device = "tmpfs";
-  fsType = "tmpfs";
-  options = [ "size=50%" "mode=700" ]; # Adjust size as needed
-};
 
   # System-wide packages
   environment.systemPackages = with pkgs; [
@@ -136,6 +136,10 @@
     #misc
     ncdu
     keet
+    cmatrix
+
+    discord
+    vencord
   ];
 
   # Fonts

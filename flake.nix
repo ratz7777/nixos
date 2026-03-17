@@ -1,6 +1,6 @@
 # ~/.my-nixos-config-btw/flake.nix
 {
-  description = "Ratz's NixOS configuration";
+  description = "ratz`s nixos-btw";
 
   inputs = {
     # Main nixpkgs with unstable channel (matches your 26.05 system)
@@ -24,6 +24,8 @@
       modules = [
         # Your main system configuration
         ./configuration.nix
+        ./nixcord.nix
+        ./hardware-configuration.nix
       ];
     };
   };
