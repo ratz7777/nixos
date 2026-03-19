@@ -2,6 +2,12 @@
 { config, lib, pkgs, inputs, pkgs-stable, ... }:
 
 {
+    imports = [
+      ./modules/nixcord.nix    # Explicitly tell NixOS: "please also include this"
+      ./modules/alacritty.nix  # And this one too
+      ./modules/fish.nix
+    ];
+
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
@@ -112,22 +118,10 @@
 
     # Web browser
     firefox
-    librewolf
 
     # System utilities
     wget
     fastfetch
-    htop
-    btop
-
-    # Archive utilities
-    unzip
-    zip
-    p7zip
-
-    # Network tools
-    curl
-    openssl
 
     # Nix utilities
     nix-output-monitor
@@ -137,10 +131,12 @@
     ncdu
     keet
     cmatrix
-
-    discord
-    vencord
   ];
+
+  #spotify network discovery
+  networking.firewall.allowedUDPPorts = [ 5353 ];
+  networking.firewall.allowedTCPPorts = [ 57621 ];
+
 
   # Fonts
   fonts.packages = with pkgs; [

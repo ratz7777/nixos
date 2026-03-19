@@ -1,35 +1,82 @@
 { config, pkgs, ... }:
+let
+  alacrittyConfig = pkgs.writeText "alacritty.toml" ''
+    [colors]
+    draw_bold_text_with_bright_colors = true
 
+    [env]
+    TERM = "alacritty"
+
+    [font]
+    size = 11.0
+
+    [font.bold]
+    family = "terminus"
+    style = "Bold"
+
+    [font.bold_italic]
+    family = "terminus"
+    style = "Bold Italic"
+
+    [font.italic]
+    family = "terminus"
+    style = "Italic"
+
+    [font.normal]
+    family = "terminus"
+    style = "Regular"
+
+    [font.offset]
+    x = 0
+    y = 1
+
+    [[keyboard.bindings]]
+    action = "Paste"
+    key = "V"
+    mods = "Control|Shift"
+
+    [[keyboard.bindings]]
+    action = "Copy"
+    key = "C"
+    mods = "Control|Shift"
+
+    [[keyboard.bindings]]
+    action = "IncreaseFontSize"
+    key = "Plus"
+    mods = "Control"
+
+    [[keyboard.bindings]]
+    action = "DecreaseFontSize"
+    key = "Minus"
+    mods = "Control"
+
+    [[keyboard.bindings]]
+    action = "ToggleFullscreen"
+    key = "F11"
+
+    [scrolling]
+    history = 10000
+    multiplier = 3
+
+    [window]
+    #decorations = "none"
+    dynamic_padding = true
+    startup_mode = "Windowed"
+    title = "Alacritty"
+
+    [window.padding]
+    x = 0
+    y = 0
+  '';
+in
 {
-  # Enable the Alacritty program in home-manager
-  programs.alacritty.enable = true;
+  environment.systemPackages = with pkgs; [ alacritty ];
 
-  # Define your Alacritty settings using a Nix attribute set.
-  # The options generally mirror the structure of Alacritty's
-  # TOML/YAML configuration file.
-  programs.alacritty.settings = {
-    # Example settings:
-    font = {
-      size = 12.0;
-      normal = {
-        family = "Terminus";
-        style = "Regular";
-      };
-    };
-    colors = {
-      primary.background = "0x181818";
-      normal.red = "0xab4642";
-      # Add other colors...
-    };
-    live_config_reload = true; # Enable live reloading
-    # Add key bindings, etc.
+  environment.etc."alacritty.toml" = {
+    text = builtins.readFile alacrittyConfig; # Method A: Using the text from above
+    target = "alacritty/alacritty.toml"; # This will create /etc/alacritty/alacritty.toml
   };
 
-  # Optional: ensure the package is installed
-  home.packages = [
-    pkgs.alacritty
-  ];
-
-  # Set the home.stateVersion appropriate for your NixOS version
-  home.stateVersion = "24.11"; # Replace with your version
+  # Or, if you have a config file in your dotfiles repository:
+  # environment.etc."alacritty/alacritty.toml".source = ./dotfiles/alacritty.toml;
 }
