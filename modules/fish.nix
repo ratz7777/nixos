@@ -8,8 +8,6 @@
     enable = true;
     interactiveShellInit = ''
     set -g fish_greeting ""
-    set -g fish_color_command brgreen
-    set -g fish_color_cwd blue
   '';
   };
   # Add fish to the list of globally available shells

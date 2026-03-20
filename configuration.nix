@@ -8,7 +8,6 @@
       ./modules/fish.nix
     ];
 
-
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   # Allow unfree packages
@@ -131,7 +130,10 @@
     ncdu
     keet
     cmatrix
+    openrgb
   ];
+
+  services.hardware.openrgb.enable = true;
 
   #spotify network discovery
   networking.firewall.allowedUDPPorts = [ 5353 ];
