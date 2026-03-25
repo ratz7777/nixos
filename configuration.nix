@@ -6,6 +6,7 @@
       ./modules/nixcord.nix    # Explicitly tell NixOS: "please also include this"
       ./modules/alacritty.nix  # And this one too
       ./modules/fish.nix
+      ./modules/openrgb.nix
     ];
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
@@ -139,36 +140,7 @@
     ncdu
     keet
     cmatrix
-    openrgb
   ];
-
-  #NORGB
-  let
-  no-rgb = pkgs.writeScriptBin "no-rgb" ''
-    #!/bin/sh
-    NUM_DEVICES=$(${pkgs.openrgb}/bin/openrgb --noautoconnect --list-devices | grep -E '^[0-9]+: ' | wc -l)
-
-    for i in $(seq 0 $(($NUM_DEVICES - 1))); do
-      ${pkgs.openrgb}/bin/openrgb --noautoconnect --device $i --mode static --color 000000
-    done
-  '';
-  in
-
-{
-  config = {
-    services.udev.packages = [ pkgs.openrgb ];
-    boot.kernelModules = [ "i2c-dev" ];
-    hardware.i2c.enable = true;
-
-    systemd.services.no-rgb = {
-      description = "no-rgb";
-      serviceConfig = {
-        ExecStart = "${no-rgb}/bin/no-rgb";
-        Type = "oneshot";
-      };
-      wantedBy = [ "multi-user.target" ];
-    };
-  };
 
   #spotify network discovery, zomboid
   networking.firewall.allowedUDPPorts = [ 5353 16261];
