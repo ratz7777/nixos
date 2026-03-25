@@ -3,8 +3,8 @@
 
 {
     imports = [
-      ./modules/nixcord.nix    # Explicitly tell NixOS: "please also include this"
-      ./modules/alacritty.nix  # And this one too
+      ./modules/nixcord.nix
+      ./modules/alacritty.nix
       ./modules/fish.nix
       ./modules/openrgb.nix
     ];
