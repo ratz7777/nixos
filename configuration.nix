@@ -13,15 +13,20 @@
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
-  services.printing = {
-  enable = true;
-  drivers = [pkgs.hplipWithPlugin];
-  };
-
   # Boot configuration
   boot.loader = {
     systemd-boot.enable = true;
     efi.canTouchEfiVariables = true;
+  };
+
+  fileSystems."/mnt/win11-kingston" = {
+    device = "/dev/nvme0n1p3";
+    fsType = "ntfs-3g";
+  };
+
+  services.printing = {
+  enable = true;
+  drivers = [pkgs.hplipWithPlugin];
   };
 
   # Network configuration
@@ -31,8 +36,10 @@
   };
 
   # Time and locale
-  time.timeZone = "Europe/Moscow";
-
+  time = {
+  hardwareClockInLocalTime = true;
+  timeZone = "Europe/Moscow";
+};
   i18n = {
     defaultLocale = "en_US.UTF-8";
     supportedLocales = [
@@ -93,8 +100,10 @@
   };
 
   # Steam
-  programs.steam.enable = true;
-
+  programs.steam = {
+  enable = true;
+  dedicatedServer.openFirewall = true; # Нужно, если будете хостить сервер
+};
   # User accounts
   users.users.ratz = {
     isNormalUser = true;
@@ -133,11 +142,37 @@
     openrgb
   ];
 
-  services.hardware.openrgb.enable = true;
+  #NORGB
+  let
+  no-rgb = pkgs.writeScriptBin "no-rgb" ''
+    #!/bin/sh
+    NUM_DEVICES=$(${pkgs.openrgb}/bin/openrgb --noautoconnect --list-devices | grep -E '^[0-9]+: ' | wc -l)
 
-  #spotify network discovery
-  networking.firewall.allowedUDPPorts = [ 5353 ];
-  networking.firewall.allowedTCPPorts = [ 57621 ];
+    for i in $(seq 0 $(($NUM_DEVICES - 1))); do
+      ${pkgs.openrgb}/bin/openrgb --noautoconnect --device $i --mode static --color 000000
+    done
+  '';
+  in
+
+{
+  config = {
+    services.udev.packages = [ pkgs.openrgb ];
+    boot.kernelModules = [ "i2c-dev" ];
+    hardware.i2c.enable = true;
+
+    systemd.services.no-rgb = {
+      description = "no-rgb";
+      serviceConfig = {
+        ExecStart = "${no-rgb}/bin/no-rgb";
+        Type = "oneshot";
+      };
+      wantedBy = [ "multi-user.target" ];
+    };
+  };
+
+  #spotify network discovery, zomboid
+  networking.firewall.allowedUDPPorts = [ 5353 16261];
+  networking.firewall.allowedTCPPorts = [ 57621 16261];
 
 
   # Fonts
