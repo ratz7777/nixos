@@ -14,9 +14,12 @@
 
     #nix-gc
     nix-gc-env.url = "github:Julow/nix-gc-env";
+
+    #nixvim
+    nixvim.url = "github:nix-community/nixvim";
   };
 
-  outputs = { self, nixpkgs, nixpkgs-stable, nixcord, nix-gc-env, ... }@inputs: {
+  outputs = { self, nixpkgs, nixpkgs-stable, nixcord, nix-gc-env, nixvim, ... }@inputs: {
     nixosConfigurations.nixos-btw = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       specialArgs = {
@@ -29,6 +32,7 @@
       modules = [
         nixcord.nixosModules.nixcord
         nix-gc-env.nixosModules.default
+        nixvim.nixosModules.nixvim
 
         ./configuration.nix
         ./hardware-configuration.nix

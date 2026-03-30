@@ -4,8 +4,11 @@
 {
     imports = [
       ./modules/nixcord.nix
+      ./modules/nixvim.nix
+
       ./modules/alacritty.nix
       ./modules/fish.nix
+
       ./modules/openrgb.nix
       ./modules/nix-gc.nix
     ];
@@ -25,6 +28,50 @@
     device = "/dev/nvme0n1p3";
     fsType = "ntfs-3g";
   };
+
+  #sound 
+  # 1. Enable Realtime scheduling (critical for 96kHz+ stability)
+  
+  security.rtkit.enable = true;
+
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    alsa.support32Bit = true;
+    pulse.enable = true;
+    jack.enable = true;
+
+    # 2. Lock the Engine to 96kHz to stop hardware switching/cracking
+    extraConfig.pipewire."92-low-latency" = {
+      "context.properties" = {
+        "default.clock.rate" = 96000;
+        "default.clock.allowed-rates" = [ 96000 ]; # Only one rate = No switching
+        "default.clock.quantum" = 1024;            # Stable buffer size
+        "default.clock.min-quantum" = 32;
+        "default.clock.max-quantum" = 2048;
+      };
+    };
+
+    # 3. MiniFuse Specific Tweaks: No Sleep, Extra Headroom
+    wireplumber.extraConfig."99-arturia-stable" = {
+      "monitor.alsa.rules" = [
+        {
+          matches = [
+            { "node.name" = "~alsa_output.usb-Arturia_MiniFuse_2.*"; }
+          ];
+          actions = {
+            update-props = {
+              "session.suspend-timeout-seconds" = 0; # Keep the DAC powered on
+              "api.alsa.headroom" = 1024;            # Buffer against USB jitter
+            };
+          };
+        }
+      ];
+    };
+  };
+
+  # 4. Kernel Tweak: Prevent USB power-saving "thumps"
+  boot.kernelParams = [ "usbcore.autosuspend=-1" ];
 
   services.printing = {
   enable = true;
@@ -123,7 +170,9 @@
     libreoffice
 
     # Editors and development
-    neovim
+    helix
+
+    libgcc
     git
 
     # Web browser
@@ -141,11 +190,18 @@
     ncdu
     keet
     cmatrix
+    qbittorrent-enhanced
 
     #llm
     ollama
-    ollama-vulkan
   ];
+
+  # 2. Configure Ollama
+  services.ollama = {
+    enable = true;
+    # Optional: ensure it uses the specific package with CUDA support
+    package = pkgs.ollama-cuda;
+  };
 
   #spotify network discovery, zomboid
   networking.firewall.allowedUDPPorts = [ 5353 16261 16262];
