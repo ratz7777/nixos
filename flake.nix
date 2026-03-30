@@ -11,9 +11,12 @@
 
     #nixcord
     nixcord.url = "github:FlameFlag/nixcord";
+
+    #nix-gc
+    nix-gc-env.url = "github:Julow/nix-gc-env";
   };
 
-  outputs = { self, nixpkgs, nixpkgs-stable, nixcord, ... }@inputs: {
+  outputs = { self, nixpkgs, nixpkgs-stable, nixcord, nix-gc-env, ... }@inputs: {
     nixosConfigurations.nixos-btw = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       specialArgs = {
@@ -24,8 +27,8 @@
         };
       };
       modules = [
-
         nixcord.nixosModules.nixcord
+        nix-gc-env.nixosModules.default
 
         ./configuration.nix
         ./hardware-configuration.nix

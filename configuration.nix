@@ -7,6 +7,7 @@
       ./modules/alacritty.nix
       ./modules/fish.nix
       ./modules/openrgb.nix
+      ./modules/nix-gc.nix
     ];
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
@@ -140,11 +141,15 @@
     ncdu
     keet
     cmatrix
+
+    #llm
+    ollama
+    ollama-vulkan
   ];
 
   #spotify network discovery, zomboid
-  networking.firewall.allowedUDPPorts = [ 5353 16261];
-  networking.firewall.allowedTCPPorts = [ 57621 16261];
+  networking.firewall.allowedUDPPorts = [ 5353 16261 16262];
+  networking.firewall.allowedTCPPorts = [ 57621 16261 16262];
 
 
   # Fonts
