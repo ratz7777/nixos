@@ -70,9 +70,6 @@
     };
   };
 
-  # 4. Kernel Tweak: Prevent USB power-saving "thumps"
-  boot.kernelParams = [ "usbcore.autosuspend=-1" ];
-
   services.printing = {
   enable = true;
   drivers = [pkgs.hplipWithPlugin];
@@ -135,7 +132,7 @@
     flatpak.enable = true;
   };
 
-  # AppImage configuration - Your working setup!
+  # for teamspeak
   programs.appimage = {
     enable = true;
     binfmt = true;
@@ -151,15 +148,13 @@
   # Steam
   programs.steam = {
   enable = true;
-  dedicatedServer.openFirewall = true; # Нужно, если будете хостить сервер
+  dedicatedServer.openFirewall = true;
 };
+
   # User accounts
   users.users.ratz = {
     isNormalUser = true;
     extraGroups = [ "wheel" "networkmanager" "video" "audio" ];
-    packages = with pkgs; [
-      # User-specific packages go here
-    ];
   };
 
   # System-wide packages
@@ -199,7 +194,6 @@
   # 2. Configure Ollama
   services.ollama = {
     enable = true;
-    # Optional: ensure it uses the specific package with CUDA support
     package = pkgs.ollama-cuda;
   };
 
@@ -211,17 +205,7 @@
   # Fonts
   fonts.packages = with pkgs; [
     terminus_font
-    # Add more fonts here
-    # noto-fonts
-    # noto-fonts-cjk
-    # noto-fonts-emoji
   ];
 
-  # Optional: Add packages from stable channel
-  # environment.systemPackages = with pkgs-stable; [
-  #   # Add stable packages here
-  # ];
-
-  # System state version
   system.stateVersion = "25.11";
 }
