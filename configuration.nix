@@ -24,8 +24,9 @@
     efi.canTouchEfiVariables = true;
   };
 
+  boot.kernelParams = [ "pcie_aspm=off" ]; # Disables Active State Power ManagementpowerManagement
   fileSystems."/mnt/win11-kingston" = {
-    device = "/dev/nvme0n1p3";
+    device = "/dev/nvme1n1p3";
     fsType = "ntfs-3g";
   };
 
@@ -79,6 +80,7 @@
   networking = {
     hostName = "nixos-btw";
     networkmanager.enable = true;
+    useDHCP = false;
   };
 
   # Time and locale
@@ -166,6 +168,7 @@
 
     # Editors and development
     helix
+    vscode
 
     libgcc
     git
@@ -187,8 +190,23 @@
     cmatrix
     qbittorrent-enhanced
 
+    #video
+    obs-studio
+    vlc
+
     #llm
     ollama
+
+    (makeDesktopItem {
+    name = "warthunder";
+    desktopName = "warthunder";
+    exec = "steam-run /home/ratz/Downloads/WarThunder/launcher";
+    icon = "warthunder";
+    comment = "War Thunder on NixOS";
+    type = "Application";
+    categories = [ "Game" ];
+    })
+
   ];
 
   # 2. Configure Ollama
