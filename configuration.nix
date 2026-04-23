@@ -31,7 +31,6 @@
   };
 
   #sound 
-  # 1. Enable Realtime scheduling (critical for 96kHz+ stability)
   
   security.rtkit.enable = true;
 
@@ -46,35 +45,21 @@
     extraConfig.pipewire."92-low-latency" = {
       "context.properties" = {
         "default.clock.rate" = 96000;
-        "default.clock.allowed-rates" = [ 96000 ]; # Only one rate = No switching
+        "default.clock.allowed-rates" = [ 96000 192000]; # Only one rate = No switching
         "default.clock.quantum" = 1024;            # Stable buffer size
         "default.clock.min-quantum" = 32;
         "default.clock.max-quantum" = 2048;
       };
     };
 
-    # 3. MiniFuse Specific Tweaks: No Sleep, Extra Headroom
-    wireplumber.extraConfig."99-arturia-stable" = {
-      "monitor.alsa.rules" = [
-        {
-          matches = [
-            { "node.name" = "~alsa_output.usb-Arturia_MiniFuse_2.*"; }
-          ];
-          actions = {
-            update-props = {
-              "session.suspend-timeout-seconds" = 0; # Keep the DAC powered on
-              "api.alsa.headroom" = 1024;            # Buffer against USB jitter
-            };
-          };
-        }
-      ];
-    };
   };
 
   services.printing = {
   enable = true;
   drivers = [pkgs.hplipWithPlugin];
   };
+
+  musnix.enable = true;
 
   # Network configuration
   networking = {
@@ -116,22 +101,39 @@
     };
   };
 
-  # Display Manager and Desktop Environment
   services = {
     xserver = {
       enable = true;
       videoDrivers = [ "nvidia" ];
     };
     desktopManager.plasma6.enable = true;
-    displayManager.ly.enable = true;
-    displayManager.ly.settings = {
-        xsessions = "";
-        default_input = "password";
+
+    displayManager.defaultSession = "plasmawayland";
+
+    greetd = {
+      enable = true;
+      settings = {
+	default_session = {
+	  command = "${pkgs.tuigreet}/bin/tuigreet --cmd startplasma-wayland";
+	};
+      };
     };
+
+#    displayManager.ly.enable = true;
+#    displayManager.ly.settings = {
+#        xsessions = "";
+#        default_input = "password";
+#	default_user = "ratz";
+#	save = true;
+#    };
 
 
     # Enable Flatpak
     flatpak.enable = true;
+  };
+
+  systemd.services.greetd = {
+    serviceConfig.Type = "idle";
   };
 
   # for teamspeak
@@ -142,7 +144,7 @@
       extraPkgs = pkgs: with pkgs; [
         libepoxy
         zstd
-
+#
       ];
     };
   };
@@ -154,9 +156,15 @@
 };
 
   # User accounts
-  users.users.ratz = {
-    isNormalUser = true;
-    extraGroups = [ "wheel" "networkmanager" "video" "audio" ];
+  users.users = {
+    ratz = {
+      isNormalUser = true;
+      extraGroups = [ "wheel" "networkmanager" "video" "audio" "seat" ];
+    };
+    megalis = {
+     isNormalUser = true;
+     extraGroups = [ "wheel" "networkmanager" "video" "audio" "seat" ];
+    };
   };
 
   # System-wide packages
@@ -173,8 +181,12 @@
     libgcc
     git
 
+    #3d printing
+    orca-slicer
+
     # Web browser
     firefox
+    chromium
 
     # System utilities
     wget
@@ -185,6 +197,7 @@
     nix-tree
 
     #misc
+    unrar
     ncdu
     keet
     cmatrix
@@ -197,6 +210,21 @@
     #llm
     ollama
 
+    #minecraft
+    jdk21_headless
+
+    #prism_minecraft
+    (makeDesktopItem {
+    name = "PrismLauncher";
+    desktopName = "PrismLauncher";
+    exec = "appimage-run /home/ratz/.prismAppimage/PrismLauncher-Linux-x86_64.AppImage";
+    icon = "prism";
+    comment = "minecraft launcher";
+    type = "Application";
+    categories = [ "Game" ];
+    })
+
+    #wt
     (makeDesktopItem {
     name = "warthunder";
     desktopName = "warthunder";
@@ -214,15 +242,48 @@
     enable = true;
     package = pkgs.ollama-cuda;
   };
+  #do not run on startup
+  systemd.services.ollama.wantedBy = lib.mkForce [ ];
 
   #spotify network discovery, zomboid
-  networking.firewall.allowedUDPPorts = [ 5353 16261 16262];
-  networking.firewall.allowedTCPPorts = [ 57621 16261 16262];
+  networking.firewall.allowedUDPPorts = [ 5353 16261 16262 25565];
+  networking.firewall.allowedTCPPorts = [ 57621 16261 16262 25565];
 
 
   # Fonts
+  
+  fonts = {
+  enableDefaultPackages = true;
+    fontconfig = {
+       antialias = true;
+       hinting = {
+	 enable = true;
+         autohint = false;
+         style = "slight";
+       };
+      
+      subpixel = {
+        rgba = "rgb";
+        lcdfilter = "default";
+      };
+   
+      defaultFonts = {
+        sansSerif = [ "Inter" "Noto Sans" ];
+        serif = [ "Noto Serif" ];
+        monospace = [ "JetBrains Mono" ];
+      };
+    };
+  };
+
   fonts.packages = with pkgs; [
-    terminus_font
+  terminus_font
+
+  inter                  # Best for UI and web
+  noto-fonts             # Solid fallback
+  noto-fonts-cjk-sans    # For Asian characters
+  noto-fonts-color-emoji       # For emojis
+  atkinson-hyperlegible  # Scientific focus on legibility
+  jetbrains-mono         # Best for terminal/coding
   ];
 
   system.stateVersion = "25.11";

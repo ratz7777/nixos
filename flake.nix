@@ -17,9 +17,12 @@
 
     #nixvim
     nixvim.url = "github:nix-community/nixvim";
+
+    #musnix
+    musnix.url = "github:musnix/musnix";
   };
 
-  outputs = { self, nixpkgs, nixpkgs-stable, nixcord, nix-gc-env, nixvim, ... }@inputs: {
+  outputs = { self, nixpkgs, nixpkgs-stable, nixcord, nix-gc-env, nixvim, musnix, ... }@inputs: {
     nixosConfigurations.nixos-btw = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       specialArgs = {
@@ -31,8 +34,9 @@
       };
       modules = [
         nixcord.nixosModules.nixcord
-        nix-gc-env.nixosModules.default
-        nixvim.nixosModules.nixvim
+    	nix-gc-env.nixosModules.default        
+	nixvim.nixosModules.nixvim	
+	musnix.nixosModules.musnix
 
         ./configuration.nix
         ./hardware-configuration.nix
