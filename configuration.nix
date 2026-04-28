@@ -1,4 +1,4 @@
-# /etc/nixos/configuration.nix
+# /etc/nixos/configuration.nix 
 { config, lib, pkgs, inputs, pkgs-stable, ... }:
 
 {
@@ -44,8 +44,8 @@
     # 2. Lock the Engine to 96kHz to stop hardware switching/cracking
     extraConfig.pipewire."92-low-latency" = {
       "context.properties" = {
-        "default.clock.rate" = 96000;
-        "default.clock.allowed-rates" = [ 96000 192000]; # Only one rate = No switching
+        "default.clock.rate" = 48000;
+        "default.clock.allowed-rates" = [48000 96000 192000]; # Only one rate = No switching
         "default.clock.quantum" = 1024;            # Stable buffer size
         "default.clock.min-quantum" = 32;
         "default.clock.max-quantum" = 2048;
@@ -114,7 +114,7 @@
       enable = true;
       settings = {
 	default_session = {
-	  command = "${pkgs.tuigreet}/bin/tuigreet --cmd startplasma-wayland";
+	  command = "${pkgs.tuigreet}/bin/tuigreet --remember --time --cmd startplasma-wayland";
 	};
       };
     };
@@ -128,12 +128,23 @@
 #    };
 
 
-    # Enable Flatpak
-    flatpak.enable = true;
+    # Enable Flatpak    
   };
 
+  services.flatpak.enable = true;
+
+  hardware.bluetooth.enable = true;
+
   systemd.services.greetd = {
-    serviceConfig.Type = "idle";
+    serviceConfig = {
+      Type = "idle";
+      StandardInput = "tty";
+      StandardOutput="tty";
+      StandardError="journal";
+      TTYReset="true";
+      TTYVHangup="true";
+      TTYVTDisallocate="true";
+    };
   };
 
   # for teamspeak
@@ -178,6 +189,8 @@
     helix
     vscode
 
+    nim-2_0
+
     libgcc
     git
 
@@ -196,11 +209,14 @@
     nix-output-monitor
     nix-tree
 
+    #terminal bloat
+    cmatrix
+    cava
+
     #misc
     unrar
     ncdu
     keet
-    cmatrix
     qbittorrent-enhanced
 
     #video
@@ -211,7 +227,18 @@
     ollama
 
     #minecraft
-    jdk21_headless
+    jdk25
+    
+    #chromium and code
+    (makeDesktopItem {
+    name = "vscode";
+    desktopName = "vscode";
+    exec = "env -u FONTCONFIG_FILE -u FONTCONFIG_PATH XDG_CONFIG_HOME=/home/ratz/.xdg_elecrton/ code";
+    icon = "vscode";
+    comment = "vscode";
+    type = "Application";
+    })
+
 
     #prism_minecraft
     (makeDesktopItem {
@@ -246,8 +273,8 @@
   systemd.services.ollama.wantedBy = lib.mkForce [ ];
 
   #spotify network discovery, zomboid
-  networking.firewall.allowedUDPPorts = [ 5353 16261 16262 25565];
-  networking.firewall.allowedTCPPorts = [ 57621 16261 16262 25565];
+  networking.firewall.allowedUDPPorts = [ 5353 16261 16262 25565 ];
+  networking.firewall.allowedTCPPorts = [ 57621 16261 16262 25565 ];
 
 
   # Fonts
@@ -255,35 +282,38 @@
   fonts = {
   enableDefaultPackages = true;
     fontconfig = {
-       antialias = true;
+       antialias = false;
+       allowBitmaps = true;
        hinting = {
 	 enable = true;
-         autohint = false;
-         style = "slight";
+	 autohint = false;
+	 style = "full";
+	
        };
-      
-      subpixel = {
-        rgba = "rgb";
-        lcdfilter = "default";
-      };
-   
-      defaultFonts = {
-        sansSerif = [ "Inter" "Noto Sans" ];
-        serif = [ "Noto Serif" ];
-        monospace = [ "JetBrains Mono" ];
-      };
+       subpixel = {
+	 rgba = "rgb";
+	 lcdfilter = "default";
+       };
     };
   };
 
   fonts.packages = with pkgs; [
   terminus_font
+  terminus_font_ttf
 
-  inter                  # Best for UI and web
-  noto-fonts             # Solid fallback
-  noto-fonts-cjk-sans    # For Asian characters
-  noto-fonts-color-emoji       # For emojis
-  atkinson-hyperlegible  # Scientific focus on legibility
-  jetbrains-mono         # Best for terminal/coding
+  noto-fonts
+  noto-fonts-cjk-sans
+  noto-fonts-color-emoji
+  
+  liberation_ttf
+ 
+  fira-code
+  fira-code-symbols
+  
+  dejavu_fonts
+
+  dina-font
+  proggyfonts
   ];
 
   system.stateVersion = "25.11";
