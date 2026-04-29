@@ -22,27 +22,37 @@
     musnix.url = "github:musnix/musnix";
   };
 
-  outputs = { self, nixpkgs, nixpkgs-stable, nixcord, nix-gc-env, nixvim, musnix, ... }@inputs: {
-    nixosConfigurations.nixos-btw = nixpkgs.lib.nixosSystem {
-      system = "x86_64-linux";
-      specialArgs = {
-        inherit inputs;
-        pkgs-stable = import nixpkgs-stable {
-          system = "x86_64-linux";
-          config.allowUnfree = true;
+  outputs =
+    {
+      self,
+      nixpkgs,
+      nixpkgs-stable,
+      nixcord,
+      nix-gc-env,
+      nixvim,
+      musnix,
+      ...
+    }@inputs:
+    {
+      nixosConfigurations.nixos-btw = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        specialArgs = {
+          inherit inputs;
+          pkgs-stable = import nixpkgs-stable {
+            system = "x86_64-linux";
+            config.allowUnfree = true;
+          };
         };
+        modules = [
+          nixcord.nixosModules.nixcord
+          nix-gc-env.nixosModules.default
+          nixvim.nixosModules.nixvim
+          musnix.nixosModules.musnix
+
+          ./configuration.nix
+          ./hardware-configuration.nix
+
+        ];
       };
-      modules = [
-        nixcord.nixosModules.nixcord
-    	nix-gc-env.nixosModules.default        
-	nixvim.nixosModules.nixvim	
-	musnix.nixosModules.musnix
-
-        ./configuration.nix
-        ./hardware-configuration.nix
-
-
-      ];
     };
-  };
 }
