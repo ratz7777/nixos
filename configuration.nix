@@ -307,17 +307,17 @@
   fonts = {
     enableDefaultPackages = true;
     fontconfig = {
-      antialias = false; # Disable smoothing
+      antialias = false;
       hinting = {
-        enable = true; # Disable hinting
-	autohint = true;
+        enable = true; 
+        autohint = true;
       };
       subpixel = {
-	lcdfilter = "none"; # Disable subpixel rendering
-	rgba = "rgb";
+        lcdfilter = "none"; 
+        rgba = "rgb";
       };
-      useEmbeddedBitmaps = true; # Force embedded bitmaps if available
-      allowBitmaps = true; # Allow bitmap fonts
+      useEmbeddedBitmaps = true;
+      allowBitmaps = true;
     };
 
     packages = with pkgs; [
