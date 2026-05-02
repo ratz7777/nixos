@@ -216,6 +216,7 @@
     vscode
 
     nixfmt
+    nil
 
     libgcc
     git
@@ -242,7 +243,6 @@
     #misc
     unrar
     ncdu
-    keet
     qbittorrent-enhanced
 
     #video
@@ -310,9 +310,12 @@
       antialias = false; # Disable smoothing
       hinting = {
         enable = true; # Disable hinting
-        style = "full";
+	autohint = true;
       };
-      subpixel.lcdfilter = "none"; # Disable subpixel rendering
+      subpixel = {
+	lcdfilter = "none"; # Disable subpixel rendering
+	rgba = "rgb";
+      };
       useEmbeddedBitmaps = true; # Force embedded bitmaps if available
       allowBitmaps = true; # Allow bitmap fonts
     };
