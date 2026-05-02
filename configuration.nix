@@ -307,14 +307,15 @@
   fonts = {
     enableDefaultPackages = true;
     fontconfig = {
-      antialias = false;
+      antialias = true;
       hinting = {
         enable = true; 
+        style = "full";
         autohint = true;
       };
       subpixel = {
-        lcdfilter = "none"; 
-        rgba = "rgb";
+        rgba = "none";
+        lcdfilter = "none";
       };
       useEmbeddedBitmaps = true;
       allowBitmaps = true;
