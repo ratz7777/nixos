@@ -16,6 +16,7 @@
     ./modules/alacritty.nix
     ./modules/fish.nix
 
+    ./modules/wallpaper.nix
     ./modules/openrgb.nix
     ./modules/nix-gc.nix
   ];
@@ -34,12 +35,6 @@
     efi.canTouchEfiVariables = true;
   };
 
-  boot.kernelParams = [ "pcie_aspm=off" ]; # Disables Active State Power ManagementpowerManagement
-  fileSystems."/mnt/win11-kingston" = {
-    device = "/dev/nvme1n1p3";
-    fsType = "ntfs-3g";
-  };
-
   #sound
 
   security.rtkit.enable = true;
@@ -51,7 +46,6 @@
     pulse.enable = true;
     jack.enable = true;
 
-    # 2. Lock the Engine to 96kHz to stop hardware switching/cracking
     extraConfig.pipewire."92-low-latency" = {
       "context.properties" = {
         "default.clock.rate" = 48000;
@@ -59,13 +53,12 @@
           48000
           96000
           192000
-        ]; # Only one rate = No switching
-        "default.clock.quantum" = 1024; # Stable buffer size
+        ];
+	      "default.clock.quantum" = 1024;
         "default.clock.min-quantum" = 32;
         "default.clock.max-quantum" = 2048;
       };
     };
-
   };
 
   services.printing = {
@@ -81,6 +74,12 @@
     networkmanager.enable = true;
     useDHCP = false;
   };
+  
+  programs.throne = {
+    enable = true;
+    tunMode.enable = true;
+  };
+  
 
   # Time and locale
   time = {
@@ -107,11 +106,10 @@
   # Graphics and NVIDIA
   hardware = {
     graphics.enable = true;
+    graphics.enable32Bit = true;
     nvidia = {
       modesetting.enable = true;
-      open = false; # Using proprietary drivers
-      # Uncomment if you want specific package
-      # package = config.boot.kernelPackages.nvidiaPackages.stable;
+      open = false;
     };
   };
 
@@ -132,19 +130,16 @@
         };
       };
     };
-
-    #    displayManager.ly.enable = true;
-    #    displayManager.ly.settings = {
-    #        xsessions = "";
-    #        default_input = "password";
-    #	default_user = "ratz";
-    #	save = true;
-    #    };
-
-    # Enable Flatpak
+ 
   };
 
   services.flatpak.enable = true;
+
+  xdg.portal = {
+    enable = true;
+    extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+    config.common.default = "*";
+  };
 
   hardware.bluetooth.enable = true;
 
@@ -165,11 +160,9 @@
     enable = true;
     binfmt = true;
     package = pkgs.appimage-run.override {
-      extraPkgs =
-        pkgs: with pkgs; [
+      extraPkgs = pkgs: with pkgs; [
           libepoxy
           zstd
-          #
         ];
     };
   };
@@ -203,6 +196,14 @@
       ];
     };
   };
+  
+  #droidcam
+
+  #  boot.extraModulePackages = with config.boot.kernelPackages; [ v4l2loopback ];
+  #  boot.kernelModules = [ "v4l2loopback" ];
+  #  boot.extraModprobeConfig = ''
+  #    options v4l2loopback exclusive_caps=1 card_label="DroidCam"
+  #  '';
 
   # System-wide packages
   environment.systemPackages = with pkgs; [
@@ -211,8 +212,10 @@
     (python3.withPackages (ps: [ ps.tkinter ]))
     libreoffice
 
+    droidcam
+    android-tools
+
     # Editors and development
-    helix
     vscode
 
     nixfmt
@@ -223,6 +226,10 @@
 
     #3d printing
     orca-slicer
+   
+    #bottles
+    wine
+    winetricks
 
     # Web browser
     firefox
@@ -290,12 +297,14 @@
 
   #spotify network discovery, zomboid, minecraft
   networking.firewall.allowedUDPPorts = [
+    4747
     5353
     16261
     16262
     25565
   ];
   networking.firewall.allowedTCPPorts = [
+    4747
     57621
     16261
     16262
@@ -305,42 +314,28 @@
   # Fonts
 
   fonts = {
-    enableDefaultPackages = true;
     fontconfig = {
-      antialias = true;
+      defaultFonts = {
+        monospace = [
+          "Consoleet Terminus-32 Smooth"
+        ];
+        sansSerif = [
+          "Consoleet Terminus-32 Smooth"
+        ];
+        serif = [
+          "Consoleet Terminus-32 Smooth"
+        ];
+      };
       hinting = {
-        enable = true; 
-        style = "full";
+        enable = true;
         autohint = true;
       };
-      subpixel = {
-        rgba = "none";
-        lcdfilter = "none";
-      };
-      useEmbeddedBitmaps = true;
-      allowBitmaps = true;
     };
 
     packages = with pkgs; [
       terminus_font
       terminus_font_ttf
-
-      noto-fonts
-      noto-fonts-cjk-sans
-      noto-fonts-color-emoji
-
-      liberation_ttf
-
-      fira-code
-      fira-code-symbols
-
-      dejavu_fonts
-
-      dina-font
-      proggyfonts
     ];
   };
-
-  system.stateVersion = "25.11";
 
 }
